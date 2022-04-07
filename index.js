@@ -21,6 +21,7 @@ class Player{
         }
         this.width = 30
         this.height = 30
+        this.isGrounded = false;
     }
 
     draw(){
@@ -42,9 +43,25 @@ class Player{
 
     }
 }
+
+class Platform {
+    constructor(){
+        this.position = {
+            x: 200,
+            y: 800
+        }
+        this.width = 200
+        this.height = 20
+    }
+    draw(){
+        c.fillStyle = "blue"
+        c.fillRect(this.position.x, this.position.y, this.width, this.height)
+    }
+}
 //---------------------------------------------------//
-//--Actually creating key and calling the Player object--//
+//--Actually creating objects--//
 const player = new Player();
+const platform = new Platform();
 const keys = {
     right: {
         pressed: false
@@ -60,6 +77,7 @@ function animate(){
     requestAnimationFrame(animate)
     c.clearRect(0, 0, canvas.width, canvas.height)
     player.update();
+    platform.draw();
 
     if(keys.right.pressed){
         player.velocity.x = 5
@@ -68,6 +86,19 @@ function animate(){
         else{
         player.velocity.x = 0
     }
+    //--Can you jump detection--//
+    if (player.position.y == canvas.height - player.height+ 0.5){
+        player.isGrounded = true;
+    }else {
+        player.isGrounded = false;
+    }
+    //--------------------------//
+ //--Platform collision detection--//   
+    if (player.position.y + player.height <= platform.position.y && player.position.y + player.height + player.velocity.y >= platform.position.y && player.position.x + player.width >= platform.position.x && player.position.x <= platform.position.x + platform.width){
+        player.velocity.y = 0
+        player.isGrounded = true;
+    }
+//-------------------------------- //
 }
 
 animate()
@@ -87,7 +118,12 @@ window.addEventListener("keydown", ({ keyCode }) => {
             keys.right.pressed = true // right
             break
         case 87:
-            player.velocity.y -= 20 //up
+            console.log(player.isGrounded);
+            if(player.isGrounded){
+                player.velocity.y -= 15 //up
+            }else{
+                break
+            }
             break
 
 
@@ -106,7 +142,7 @@ window.addEventListener("keyup", ({ keyCode }) => {
             keys.right.pressed = false //right
             break
         case 87:
-            player.velocity.y -= 20 //up
+            //player.velocity.y = 0 //up
             break
 
 
