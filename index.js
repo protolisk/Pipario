@@ -45,10 +45,10 @@ class Player{
 }
 
 class Platform {
-    constructor(){
+    constructor({x, y}){
         this.position = {
-            x: 200,
-            y: 800
+            x: x,
+            y: y
         }
         this.width = 200
         this.height = 20
@@ -61,7 +61,8 @@ class Platform {
 //---------------------------------------------------//
 //--Actually creating objects--//
 const player = new Player();
-const platform = new Platform();
+//const platform = new Platform();
+const platforms = [new Platform({x: 200, y: 800}), new Platform({x: 500, y: 700})]
 const keys = {
     right: {
         pressed: false
@@ -71,33 +72,59 @@ const keys = {
     }
 }
 //---------------------------------------------------//
-
+//---Win scenario---//
+let scrollOffset = 0
+//-----------------//
 //--Animation--//
 function animate(){
     requestAnimationFrame(animate)
     c.clearRect(0, 0, canvas.width, canvas.height)
     player.update();
-    platform.draw();
-
-    if(keys.right.pressed){
+    platforms.forEach(platform => {
+        platform.draw();
+    })
+    
+//--key presses and sidescrolling--//
+    if(keys.right.pressed && player.position.x < 400){
         player.velocity.x = 5
-    }else if(keys.left.pressed){
+    }else if(keys.left.pressed && player.position.x > 100){
         player.velocity.x = -5 }
         else{
         player.velocity.x = 0
+        if (keys.right.pressed) {
+            platforms.forEach((platform) => {
+                platform.position.x -=5
+                scrollOffset += 5
+            })
+        }else if (keys.left.pressed){
+            platforms.forEach((platform) => {
+                platform.position.x +=5
+                scrollOffset -= 5
+            })
+            
+        }
+        //wincon
+        if (scrollOffset > 1000){
+            console.log("You win");
+        }
     }
+    //-----------------//
     //--Can you jump detection--//
     if (player.position.y == canvas.height - player.height+ 0.5){
         player.isGrounded = true;
     }else {
         player.isGrounded = false;
     }
+
+    
     //--------------------------//
  //--Platform collision detection--//   
+platforms.forEach((platform) => {
     if (player.position.y + player.height <= platform.position.y && player.position.y + player.height + player.velocity.y >= platform.position.y && player.position.x + player.width >= platform.position.x && player.position.x <= platform.position.x + platform.width){
         player.velocity.y = 0
         player.isGrounded = true;
     }
+})
 //-------------------------------- //
 }
 
